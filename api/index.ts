@@ -6,10 +6,8 @@ const app = express();
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-// All POS API routes
 app.use('/api', apiRouter);
 
-// Health check
 app.get('/api/health', (_req, res) => {
   res.status(200).json({
     success: true,
