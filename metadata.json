@@ -1,0 +1,6 @@
+{
+  "name": "Retail POS & Inventory System",
+  "description": "Complete Point of Sale system with inventory management, barcode generation and scanning, GST billing, customer management, and automated SMS bill delivery.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
