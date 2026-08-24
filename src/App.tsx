@@ -1,3 +1,7 @@
+import { Login } from './components/auth/Login';
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { auth } from './firebase';
 import React from 'react';
 import { POSProvider, usePOS } from './context/POSContext';
 import { Navbar } from './components/common/Navbar';
