@@ -6,46 +6,68 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-async function startServer() {
-  const app = express();
-  const PORT = 3000;
+export const app = express();
 
-  // JSON parsing middleware
-  app.use(express.json({ limit: '10mb' }));
-  app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
-  // API Routes
-  app.use('/api', apiRouter);
+// ===============================
+// API ROUTES
+// ===============================
+app.use('/api', apiRouter);
 
-  // Health check endpoint
-  app.get('/api/health', (req, res) => {
-    res.json({ status: 'ok', time: new Date().toISOString() });
+// ===============================
+// HEALTH CHECK
+// ===============================
+app.get('/api/health', (_req, res) => {
+  res.json({
+    success: true,
+    status: 'ok',
+    time: new Date().toISOString(),
+  });
+});
+
+// ===============================
+// DIGITAL INVOICE
+// ===============================
+app.get('/api/pos/invoice-html/:id', (req, res) => {
+  const { id } = req.params;
+
+  res.redirect(`/#/invoice/${id}`);
+});
+
+// ===============================
+// LOCAL DEVELOPMENT
+// ===============================
+async function startDevelopmentServer() {
+  const vite = await createViteServer({
+    server: {
+      middlewareMode: true,
+    },
+    appType: 'spa',
   });
 
-  // Digital Invoice Direct HTML Viewer (Accessible via SMS link)
-  app.get('/api/pos/invoice-html/:id', (req, res) => {
-    const { id } = req.params;
-    res.redirect(`/#/invoice/${id}`);
-  });
+  app.use(vite.middlewares);
 
-  // Vite middleware for development vs static build in production
-  if (process.env.NODE_ENV !== 'production') {
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: 'spa',
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`POS Retail Server running on http://0.0.0.0:${PORT}`);
+    console.log(
+      `POS Retail Server running on http://localhost:${PORT}`
+    );
   });
 }
 
-startServer();
+// ===============================
+// START ONLY LOCALLY
+// ===============================
+if (!process.env.VERCEL) {
+  startDevelopmentServer().catch((error) => {
+    console.error('Failed to start development server:', error);
+    process.exit(1);
+  });
+}
+
+// IMPORTANT:
+// Vercel will import this Express app.
+export default app;
